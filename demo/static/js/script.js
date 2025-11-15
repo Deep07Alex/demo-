@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener("DOMContentLoaded", function () {
   const saleBtn = document.querySelector("#btn1");
   const romanceBtn = document.querySelector("#btn2");
-  const tredingbtn = document.querySelector("#btn3");
+  const trading_financebtn = document.querySelector("#btn3");  
   const mangabtn = document.querySelector("#btn4");
 
   if (saleBtn) {
@@ -102,10 +102,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  if (tredingbtn) {
-    tredingbtn.addEventListener("click", function (e) {
+  if (trading_financebtn) {  
+    trading_financebtn.addEventListener("click", function (e) { 
       e.preventDefault();
-      window.location.href = "/treding/"; 
+      window.location.href = "/trading-finance/";  
     });
   }
 
