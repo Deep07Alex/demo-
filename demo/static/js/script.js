@@ -87,6 +87,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const romanceBtn = document.querySelector("#btn2");
   const trading_financebtn = document.querySelector("#btn3");  
   const mangabtn = document.querySelector("#btn4");
+  const Mythologybtn = document.querySelector("#btn5");
+  const Hindibtn = document.querySelector("#btn6");
+  const Prelovedbtn = document.querySelector("#btn7");
+  const newbtn = document.querySelector("#btn8");
+  const combobtn = document.querySelector("#btn9");
+
+
+
 
   if (saleBtn) {
     saleBtn.addEventListener("click", function (e) {
@@ -113,6 +121,41 @@ document.addEventListener("DOMContentLoaded", function () {
     mangabtn.addEventListener("click", function (e) {
       e.preventDefault();
       window.location.href = "/manga/"; 
+    });
+  }
+
+  if (Mythologybtn) {
+    Mythologybtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/Mythology/"; 
+    });
+  }
+
+  if (Hindibtn) {
+    Hindibtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/Hindi/"; 
+    });
+  }
+
+  if (Prelovedbtn) {
+    Prelovedbtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/Preloved/"; 
+    });
+  }
+
+  if (newbtn) {
+    newbtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/new/"; 
+    });
+  }
+
+  if (combobtn) {
+    combobtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "/combo/"; 
     });
   }
 });

@@ -86,9 +86,6 @@
   </div>
   </section>
 
-
-
-
   <!-- Sale Content -->
   <section class="book-sale">
     <h2 class="section-title">SELF-HELP ON SALE</h2>
@@ -115,7 +112,6 @@
       <button class="view-btn" id="btn1">View all</button>
     </div>
   </section>
-
 
   <!-- Romance Content -->
   <section class="book-sale">
@@ -175,35 +171,6 @@
   </div>
   </section>
 
-  <!-- Manga Content -->
-  <section class="book-sale">
-  <h2 class="section-title">Manga Sets</h2>
-
-  <div class="book-grid">
-    {% for book in manga_books %}
-      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
-        <div class="book-card">
-          <img src="{{ book.image.url }}" alt="{{ book.title }}">
-          <span class="sale-tag">Sale</span>
-          <h3 class="book-title">{{ book.title }}</h3>
-          {% if book.old_price %}
-            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
-          {% else %}
-            <p class="price">Rs. {{ book.price }}</p>
-          {% endif %}
-          <button class="cart-btn">Add to cart</button>
-        </div>
-      </a>
-    {% empty %}
-      <p style="text-align:center;">No books available right now.</p>
-    {% endfor %}
-  </div>
-
-  <div class="view-all">
-    <button class="view-btn" id="btn4">View all</button>
-  </div>
-  </section>
-
   <!-- Banner Section -->
   <section class="banner">
   <div class="banner_container">
@@ -236,6 +203,209 @@
       </div>
     </div>
 
+  </div>
+  </section>
+
+  <!-- Manga Content -->
+  <section class="book-sale">
+  <h2 class="section-title">Manga Sets</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn4">View all</button>
+  </div>
+  </section>
+
+  <!-- Robert Greene Special -->
+  <section class="book-sale">
+  <h2 class="section-title">Robert Greene Special</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  {% comment %} <div class="view-all">
+    <button class="view-btn" id="btn4">View all</button>
+  </div> {% endcomment %}
+  </section>
+
+  <!-- Mythology -->
+  <section class="book-sale">
+  <h2 class="section-title">Mythology</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn5">View all</button>
+  </div>
+  </section>
+
+  <!-- Hindi Books -->
+  <section class="book-sale">
+  <h2 class="section-title">Hindi Books</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn6">View all</button>
+  </div>
+  </section>
+
+  <!-- Preloved Bestsellers -->
+  <section class="book-sale">
+  <h2 class="section-title">Preloved Bestsellers</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn7">View all</button>
+  </div>
+  </section>
+
+  <!-- New Arrivals -->
+  <section class="book-sale">
+  <h2 class="section-title">New Arrivals</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn8">View all</button>
+  </div>
+  </section>
+
+   <!-- Self-help/Finance Combos -->
+  <section class="book-sale">
+  <h2 class="section-title">Self-help/Finance Combos</h2>
+
+  <div class="book-grid">
+    {% for book in manga_books %}
+      <a href="{% url 'book_detail' book.slug %}" class="book-card-link">
+        <div class="book-card">
+          <img src="{{ book.image.url }}" alt="{{ book.title }}">
+          <span class="sale-tag">Sale</span>
+          <h3 class="book-title">{{ book.title }}</h3>
+          {% if book.old_price %}
+            <p class="price"><span class="old">Rs. {{ book.old_price }}</span> Rs. {{ book.price }}</p>
+          {% else %}
+            <p class="price">Rs. {{ book.price }}</p>
+          {% endif %}
+          <button class="cart-btn">Add to cart</button>
+        </div>
+      </a>
+    {% empty %}
+      <p style="text-align:center;">No books available right now.</p>
+    {% endfor %}
+  </div>
+
+  <div class="view-all">
+    <button class="view-btn" id="btn9">View all</button>
   </div>
   </section>
 
