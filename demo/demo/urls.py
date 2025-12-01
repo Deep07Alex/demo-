@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
@@ -11,4 +11,3 @@ urlpatterns = [
     path('aboutus/', views.Aboutus, name="aboutus"),
     path('contactinformation/', views.contact_information, name="contactinformation"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

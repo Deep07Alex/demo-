@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ category_name }} - Family BookStore{% endblock %}
+
+{% block content %}
+<h2 class="section-title">{{ category_name }}</h2>
+
+<div class="book-grid">
+  {% for item in items %}
+  <a href="#" class="book-card-link">
+    <div class="book-card">
+      <img src="{{ item.image.url }}" alt="{{ item.title }}">
+      <h3 class="book-title">{{ item.title }}</h3>
+      <p class="price">Rs. {{ item.price }}</p>
+      <button class="cart-btn">Add to cart</button>
+    </div>
+  </a>
+  {% empty %}
+  <p style="text-align: center; grid-column: 1/-1;">No items available in this category.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -20,10 +20,8 @@ class product_variety(mod.Model):
     date_added = mod.DateTimeField(default=timezone.now)
     type = mod.CharField(max_length=4,choices=PRODUCT_TYPE_CHOICE)
     
-    def __str__(self):
+    def __str__(self):  
         return self.name
-    
-
 
 class MarvelComic(mod.Model):
     title = mod.CharField(max_length=200)
@@ -33,5 +31,5 @@ class MarvelComic(mod.Model):
     image = mod.ImageField(upload_to='marvel_comics/', blank=True, null=True)
     date_added = mod.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def __str__(self):  
         return self.title
