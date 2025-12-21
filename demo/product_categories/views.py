@@ -33,3 +33,4 @@ def product_category_detail(request, category_type):
         'items': products,  # This will now only contain products for THIS category
         'category_type': category_type,
     })
+    

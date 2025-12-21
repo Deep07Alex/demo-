@@ -403,3 +403,4 @@ def test_hash(request):
         <p><strong>Expected:</strong> {expected_hash}</p>
         <p><strong>Match:</strong> {generated_hash == expected_hash}</p>
     """)
+    

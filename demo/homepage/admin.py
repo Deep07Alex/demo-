@@ -21,3 +21,4 @@ class BookAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('date_added',)
+    

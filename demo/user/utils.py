@@ -251,3 +251,4 @@ def send_customer_order_confirmation(order, items, delivery_method='sms'):
     except Exception as e:
         logger.error(f"Customer notification failed: {str(e)}")
         return False, str(e)
+    

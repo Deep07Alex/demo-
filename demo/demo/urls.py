@@ -24,4 +24,4 @@ urlpatterns = [
     path('payment/failure/', user_views.payment_failure, name='payment_failure'),
     path('test-hash/', user_views.test_hash, name='test_hash'),
     path('', include("user.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 

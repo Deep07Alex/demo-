@@ -13,3 +13,4 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('category', 'on_sale')
     search_fields = ('title', 'author')
     ordering = ('-date_added',)
+

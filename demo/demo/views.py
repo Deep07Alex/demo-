@@ -141,7 +141,7 @@ def search(request):
     """Handle search page requests"""
     query = request.GET.get('q', '').strip()
     results = []
-    
+
     if query:
         # Search books
         book_results = Book.objects.filter(

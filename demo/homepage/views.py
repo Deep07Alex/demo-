@@ -45,3 +45,4 @@ def category_view(request, category_slug):
         'category_name': config['name'],
         'category_slug': category_slug,
     })
+    
