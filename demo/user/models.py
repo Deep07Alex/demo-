@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils import timezone
 import random
+import uuid
+from django.db import models
+
 
 class PhoneVerification(models.Model):
     DELIVERY_CHOICES = [

@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from . import views
+from user import views as user_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -18,5 +19,9 @@ urlpatterns = [
     path('cart/update/', views.update_cart_quantity, name='update_cart_quantity'),
     path('checkout/', views.checkout, name='checkout'),
     path('bulkpurchase/', views.bulk_purchase, name='bulk_purchase'),
+     path('api/initiate-payment/', user_views.initiate_payu_payment, name='initiate_payu_payment'),
+    path('payment/success/', user_views.payment_success, name='payment_success'),
+    path('payment/failure/', user_views.payment_failure, name='payment_failure'),
+    path('test-hash/', user_views.test_hash, name='test_hash'),
     path('', include("user.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,10 +1,16 @@
-from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.shortcuts import render
 from .models import PhoneVerification, Order, OrderItem
-from django.utils import timezone
+from .payu_utils import generate_payu_hash, generate_transaction_id, verify_payu_hash
+from .utils import send_otp_to_user, send_customer_order_confirmation, send_admin_order_notification
 import json
-from .utils import send_otp_to_user
+import logging
+import uuid
+
+logger = logging.getLogger(__name__)
 
 @require_POST
 def send_otp(request):
@@ -23,7 +29,7 @@ def send_otp(request):
         
         # Clean phone number
         if not phone.startswith('+'):
-            phone = f"+91{phone}"  # Default to India country code
+            phone = f"+91{phone}" 
         
         # Generate and save OTP
         verification = PhoneVerification(
@@ -149,28 +155,30 @@ def resend_otp(request):
         })
 
 @require_POST
-def save_order(request):
-    """Save order after payment"""
+def initiate_payu_payment(request):
     try:
-        # Check if phone is verified
         if not request.session.get('verified_phone'):
-            return JsonResponse({
-                'success': False,
-                'error': 'Phone not verified'
-            })
+            return JsonResponse({'success': False, 'error': 'Phone not verified'})
         
         data = json.loads(request.body)
         cart = request.session.get('cart', {})
         
         if not cart:
-            return JsonResponse({
-                'success': False,
-                'error': 'Cart is empty'
-            })
+            return JsonResponse({'success': False, 'error': 'Cart is empty'})
+        
+        verification = PhoneVerification.objects.get(
+            id=request.session.get('verification_id'),
+            is_verified=True
+        )
+        
+        # Calculate totals
+        subtotal = sum(float(item['price']) * item['quantity'] for item in cart.values())
+        shipping = 49.00
+        total = subtotal + shipping
         
         # Create order
         order = Order.objects.create(
-            phone_number=request.session['verified_phone'],
+            phone_number=verification.phone_number,
             full_name=data.get('fullname'),
             email=data.get('email'),
             address=data.get('address'),
@@ -179,9 +187,10 @@ def save_order(request):
             pin_code=data.get('pin'),
             delivery_type=data.get('delivery'),
             payment_method=data.get('payment_method'),
-            subtotal=float(data.get('subtotal', 0)),
-            shipping=float(data.get('shipping', 0)),
-            total=float(data.get('total', 0))
+            subtotal=subtotal,
+            shipping=shipping,
+            total=total,
+            status='pending'
         )
         
         # Create order items
@@ -196,18 +205,201 @@ def save_order(request):
                 image_url=item.get('image', '')
             )
         
-        # Clear cart
-        del request.session['cart']
-        del request.session['verified_phone']
+        # CRITICAL: Clean phone number
+        phone = verification.phone_number
+        phone = phone.replace('+91', '').replace(' ', '').strip()
+        if len(phone) != 10:
+            return JsonResponse({'success': False, 'error': 'Phone must be exactly 10 digits'})
+        
+        # Generate PayU params
+        txnid = generate_transaction_id()
+        product_info = f"Book Order {order.id}"  
+        
+        payu_params = {
+            'key': settings.PAYU_MERCHANT_KEY,
+            'txnid': txnid,
+            'amount': f"{total:.2f}",  # Ensure 2 decimal places
+            'productinfo': product_info,
+            'firstname': order.full_name.split()[0][:50],  # Max 50 chars
+            'email': order.email[:50],  # Max 50 chars
+            'phone': phone,
+            'surl': request.build_absolute_uri('/payment/success/'),
+            'furl': request.build_absolute_uri('/payment/failure/'),
+            'udf1': str(order.id),
+            'udf2': '',
+            'udf3': '',
+            'udf4': '',
+            'udf5': '',
+        }
+        
+        # Generate hash
+        payu_params['hash'] = generate_payu_hash(payu_params)
+        
+        # LOG EVERYTHING
+        logger.error("=== PAYU REQUEST PARAMETERS ===")
+        for key, value in payu_params.items():
+            logger.error(f"{key}: {value} (type: {type(value)})")
+        
+        request.session['payu_txnid'] = txnid
+        
+        payu_url = settings.PAYU_TEST_URL
         
         return JsonResponse({
             'success': True,
-            'order_id': order.id,
-            'message': 'Order placed successfully'
+            'payu_url': payu_url,
+            'payu_params': payu_params
         })
         
     except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
+        logger.error(f"PAYMENT INIT ERROR: {str(e)}", exc_info=True)
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+def payment_success(request):
+    """Handle successful PayU payment return"""
+    if request.method == 'POST':
+        response_data = request.POST.dict()
+        
+        # Verify hash
+        received_hash = response_data.get('hash', '')
+        calculated_hash = verify_payu_hash(response_data)
+        
+        print(f"RECEIVED HASH: {received_hash}")
+        print(f"CALCULATED HASH: {calculated_hash}")
+        
+        if received_hash == calculated_hash:
+            # Hash verified - payment is legitimate
+            order_id = response_data.get('udf1')
+            status = response_data.get('status')
+            
+            try:
+                order = Order.objects.get(id=order_id)
+                
+                if status == 'success':
+                    order.status = 'processing'  # Payment successful
+                    order.save()
+                    
+                    # Get order items for notifications
+                    items = order.items.all()
+                    
+                    # Get customer's delivery preference from verification
+                    try:
+                        verification = PhoneVerification.objects.filter(
+                            phone_number=order.phone_number
+                        ).latest('created_at')
+                        customer_delivery_method = verification.delivery_method
+                    except:
+                        customer_delivery_method = 'sms'  # Default fallback
+                    
+                    # --- SEND DUAL NOTIFICATIONS ---
+                    
+                    # 1. Notify ADMIN via EMAIL
+                    admin_success, admin_msg = send_admin_order_notification(order, items)
+                    if not admin_success:
+                        print(f"⚠️ Admin notification failed: {admin_msg}")
+                    
+                    # 2. Notify CUSTOMER via SMS/WhatsApp
+                    customer_success, customer_msg = send_customer_order_confirmation(
+                        order, items, customer_delivery_method
+                    )
+                    if not customer_success:
+                        print(f"⚠️ Customer notification failed: {customer_msg}")
+                    
+                    # Clear cart and session
+                    if 'cart' in request.session:
+                        del request.session['cart']
+                    if 'verified_phone' in request.session:
+                        del request.session['verified_phone']
+                    if 'verification_id' in request.session:
+                        del request.session['verification_id']
+                    if 'payu_txnid' in request.session:
+                        del request.session['payu_txnid']
+                    
+                    return render(request, 'pages/payment_success.html', {
+                        'order': {
+                            'order_id': order.id,
+                            'total': order.total,
+                            'status': 'Paid'
+                        },
+                        'notification_sent': customer_success
+                    })
+                else:
+                    # Payment failed - delete the order
+                    order.delete()
+                    return render(request, 'pages/payment_failure.html', {
+                        'error': f'Payment status: {status}'
+                    })
+                    
+            except Order.DoesNotExist:
+                return render(request, 'pages/payment_failure.html', {
+                    'error': 'Order not found'
+                })
+        else:
+            # Hash mismatch - possible tampering
+            print("HASH MISMATCH - Possible tampering attempt!")
+            return render(request, 'pages/payment_failure.html', {
+                'error': 'Security verification failed'
+            })
+    
+    return render(request, 'pages/payment_failure.html', {
+        'error': 'Invalid request method'
+    })
+
+
+@csrf_exempt
+def payment_failure(request):
+    """Handle failed/cancelled PayU payment"""
+    if request.method == 'POST':
+        response_data = request.POST.dict()
+        
+        # Try to get order ID and delete pending order
+        order_id = response_data.get('udf1')
+        if order_id:
+            try:
+                order = Order.objects.get(id=order_id, status='pending')
+                order.delete()  # Remove pending order
+            except Order.DoesNotExist:
+                pass
+        
+        error_message = response_data.get('error_Message', 'Payment failed')
+        return render(request, 'pages/payment_failure.html', {
+            'error': error_message
         })
+
+    return render(request, 'pages/payment_failure.html', {
+        'error': 'Payment cancelled or failed'
+    })
+
+def test_hash(request):
+    """Test hash generation against PayU's example"""
+    test_params = {
+        'key': 'kdbOTy',
+        'txnid': 'TXN-378A9FCDF2DB',
+        'amount': '248.00',
+        'productinfo': 'Book Order 9',
+        'firstname': 'Aritra',
+        'email': 'aritradatt39@gmail.com',
+        'udf1': '9',
+        'udf2': '',
+        'udf3': '',
+        'udf4': '',
+        'udf5': '',
+    }
+    
+    # Temporarily override salt
+    original_salt = settings.PAYU_MERCHANT_SALT
+    settings.PAYU_MERCHANT_SALT = 'BKipBlA1YKJopYdzyBtErUmRUkkXMPiU'
+    
+    generated_hash = generate_payu_hash(test_params)
+    
+    # Restore original salt
+    settings.PAYU_MERCHANT_SALT = original_salt
+    
+    expected_hash = "c95324fa66e20bd8a4a080a22419a6a9bdfb92992b0096c09f7511629329f31ed6f85f7ebce004535e36009c26648a2333934135f903436f5f3e870cc4458f06"
+    
+    return HttpResponse(f"""
+        <h1>Hash Test Results</h1>
+        <p><strong>Generated:</strong> {generated_hash}</p>
+        <p><strong>Expected:</strong> {expected_hash}</p>
+        <p><strong>Match:</strong> {generated_hash == expected_hash}</p>
+    """)

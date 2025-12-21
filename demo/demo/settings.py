@@ -93,6 +93,12 @@ FAST2SMS_API_KEY = os.getenv('FAST2SMS_API_KEY')
 WHATSAPP_ACCESS_TOKEN = os.getenv('WHATSAPP_ACCESS_TOKEN')
 WHATSAPP_PHONE_ID = os.getenv('WHATSAPP_PHONE_ID')
 
+PAYU_MERCHANT_KEY = os.getenv('PAYU_MERCHANT_KEY')
+PAYU_MERCHANT_SALT = os.getenv('PAYU_MERCHANT_SALT')
+PAYU_TEST_MODE = True # Set to False for production
+
+PAYU_TEST_URL = "https://test.payu.in/_payment"
+PAYU_PROD_URL = "https://secure.payu.in/_payment"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators   
@@ -141,3 +147,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field   
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'aritradatt39@gmail.com'
+
+# Generate from: https://myaccount.google.com/apppasswords
+EMAIL_HOST_PASSWORD = 'bsoocmwntvpfyvbj'
+
+DEFAULT_FROM_EMAIL = 'Family BookStore <aritradatt39@gmail.com>'
+
+# Admin email for order notifications
+ADMIN_ORDER_EMAIL = 'aritradatt39@gmail.com'
