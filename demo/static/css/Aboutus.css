@@ -1,289 +1,49 @@
-
-*,
-*::before,
-*::after {
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-:root {
-  --font-main: 'Nunito', Arial, Helvetica, sans-serif;
-  --pink: #e20074;
-  --dark-bg: #1e222b;
-  --grey: #ccc;
-  --light-grey: #f5f5f5;
-  --radius: 4px;
-  --max-width: 900px;
-  --header-h: 65px;
-  --footer-h: 200px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Nunito', sans-serif;
 }
 
-html {
-  height: 100%;
-  scroll-behavior: smooth;
-}
-
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: var(--font-main);
-  background: #fff8f9;
-  color: #222;
-}
-
-/* 2.  STICKY HEADER
------------------------------------------------------------ */
-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: var(--header-h);
-  z-index: 1000;
-  background: #fff;
-  border-bottom: 1px solid #eaeaea;
-}
-
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  padding: 0 40px;
-}
-
-.nav-logo {
-  width: 50px;
-  height: 50px;
-}
-
-.logo {
-  width: 100%;
-  height: 100%;
-  background: url('../images/logo.png') center/contain no-repeat;
-}
-
-.nav-links {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  gap: 22px;
-}
-
-.nav-links a {
-  color: #333;
-  text-decoration: none;
-  font-size: 0.85rem;
-  letter-spacing: 0.2px;
-  transition: border-bottom 0.3s;
-}
-
-.nav-links a.active,
-.nav-links a:hover {
-  border-bottom: 1px solid #000;
-}
-
-.nav-icons {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  font-size: 14px;
-}
-
-/* 3.  FOOTER
------------------------------------------------------------ */
-footer.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: var(--footer-h);
-  z-index: 1000;
-  background: var(--dark-bg);
-  color: #fff;
-  padding: 50px 80px 20px;
-}
-
-.footer-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  border-bottom: 1px solid #333;
-  padding-bottom: 30px;
-}
-
-.footer-section {
-  flex: 1 1 250px;
-  margin: 20px;
-}
-
-.footer-section h3 {
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.footer-section ul {
-  list-style: none;
-}
-
-.footer-section ul li {
-  margin-bottom: 10px;
-}
-
-.footer-section ul li a {
-  color: var(--grey);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-section ul li a:hover {
-  color: #fff;
-}
-
-.social-icons a {
-  color: var(--grey);
-  margin-right: 15px;
-  font-size: 20px;
-  transition: color 0.3s;
-}
-
-.social-icons a:hover {
-  color: #fff;
-}
-
-.footer-logo {
-  width: 60px;
-  background: #000;
-  border-radius: 10px;
-}
-
-.footer-bottom {
-  text-align: center;
-  padding-top: 20px;
-  font-size: 14px;
-  color: var(--grey);
-}
-
-.payment-icons img {
-  width: 40px;
-  margin: 0 8px;
-  filter: brightness(0) invert(1);
-}
-
-/* 4.  CONTENT SAFE-AREA
------------------------------------------------------------ */
-main,
-.site-wrapper,
-.content-wrapper {
-  flex: 1 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-}
-
-/* 5.  BULK-FORM STYLES
------------------------------------------------------------ */
-.container {
-  width: 100%;
-  max-width: var(--max-width);
-  background: #fff;
+/* Main container */
+.canvas {
+  max-width: 800px;
+  margin: 60px auto;
   padding: 40px;
+  background-color: #fff;
 }
 
-h1 {
-  font-size: 48px;
-  font-weight: 500;
-  margin-bottom: 40px;
+/* Heading style */
+.heading h1 {
+  color: #121212;
+  font-size: 36px;
+  font-weight: 700;
   text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 2px solid #121212;
+  display: inline-block;
+  padding-bottom: 8px;
 }
 
-.bulk-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* Paragraph style */
+.para p {
+  color: #2b2b2b;
+  font-size: 18px;
+  font-weight: 550;
+  line-height: 1.6;
+  text-align: justify;
+  margin-bottom: 30px;
 }
 
-.row {
-  display: flex;
-  gap: 20px;
+.para.second {
+  margin-top: 20px;
 }
 
-.row input {
-  flex: 1;
-}
 
-input,
-textarea {
-  width: 100%;
-  padding: 15px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: var(--radius);
-}
-
-textarea {
-  height: 140px;
-  resize: none;
-}
-
-button {
-  width: 130px;
-  padding: 12px 20px;
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 16px;
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-
-button:hover {
-  opacity: 0.8;
-}
-
-/* 6.  RESPONSIVE
------------------------------------------------------------ */
-@media (max-width: 768px) {
-  .navbar {
-    padding: 0 20px;
-  }
-
-  .nav-links {
-    display: none;
-  }
-
-  footer.footer {
-    padding: 40px 20px 20px;
-  }
-
-  .footer-container {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .container {
-    padding: 30px 20px;
-  }
-
-  h1 {
-    font-size: 36px;
-  }
-
-  .row {
-    flex-direction: column;
-  }
-
-  button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  h1 {
-    font-size: 32px;
-  }
-}
