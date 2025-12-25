@@ -13,15 +13,13 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   </head>
   <body>
-    <!-- Cart Sidebar -->
-    <div class="overlay" id="cartOverlay"></div>
-    <div class="cart-sidebar" id="cartSidebar">
-      <!-- ... same cart sidebar as other pages ... -->
-    </div>
-
     <!-- Header -->
     <header>
       <nav class="navbar">
+        <!-- Hamburger Menu -->
+        <div class="hamburger" id="hamburger">
+          <i class="fa fa-bars"></i>
+        </div>
         <div class="nav-logo">
           <div class="logo"></div>
         </div>
@@ -35,6 +33,7 @@
           {% comment %} <a href="#">Terms & Conditions</a>
           <a href="#">Privacy Policy</a> {% endcomment %}
         </div>
+        {% comment %}
         <div class="nav-icons">
           <div class="search-container">
             <input
@@ -54,6 +53,7 @@
               >0</span
             >
           </div>
+          {% endcomment %}
         </div>
       </nav>
     </header>
@@ -122,6 +122,22 @@
         </div>
       </div>
     </footer>
+
+    <!-- Right-Side Slider -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-sidebar" id="closeSidebar">&times;</span>
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/productcatagory/">Product Categories</a></li>
+        <li><a href="/bulkpurchase/">Bulk Purchase</a></li>
+        <li><a href="/aboutus/">About Us</a></li>
+        <li><a href="/return/">Return & Replacement</a></li>
+        <li><a href="/contactinformation/">Contact Us</a></li>
+      </ul>
+    </div>
 
     <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
