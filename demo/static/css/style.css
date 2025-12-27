@@ -480,11 +480,12 @@ body {
 /* ---------- 5. Hero Section ---------- */
 /* Slider Container */
 /* ---------- Hero Section ---------- */
+/* Slider Container */
 .slider {
   position: relative;
   width: 100%;
   max-width: 1200px;
-  height: 400px;
+  height: 320px;
   margin: 30px auto;
   overflow: hidden;
   border-radius: 12px;
@@ -506,11 +507,9 @@ body {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 40px;
   color: white;
-  box-sizing: border-box;
-  text-align: left;
 }
 
 /* Slide backgrounds */
@@ -521,28 +520,23 @@ body {
 
 /* Text */
 .slide-content h2 {
-  font-size: 36px;
+  font-size: 32px;
   margin: 0 0 10px;
 }
 
 .slide-content p {
-  font-size: 20px;
+  font-size: 18px;
   margin-bottom: 15px;
 }
 
 .slide-content button {
-  padding: 12px 25px;
+  padding: 10px 20px;
   border: none;
   background: white;
   color: black;
   font-weight: bold;
-  border-radius: 25px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: 0.3s;
-}
-
-.slide-content button:hover {
-  background: rgba(255,255,255,0.9);
 }
 
 /* Arrows */
@@ -550,22 +544,17 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.8);
+  background: white;
   color: black;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 20px;
   z-index: 10;
-  transition: 0.3s;
-}
-
-.arrow:hover {
-  background: white;
 }
 
 .arrow.left { left: 15px; }
@@ -578,20 +567,31 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background: rgba(255,255,255,0.5);
   border-radius: 50%;
   cursor: pointer;
-  transition: 0.3s;
 }
 
 .dot.active {
   background: white;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .slide {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .slide-content h2 {
+    font-size: 22px;
+  }
 }
 
 /* ---------- Fully Responsive ---------- */
