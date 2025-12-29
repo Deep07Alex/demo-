@@ -33,7 +33,9 @@ const startTimer = () => {
     s--;
     const mins = Math.floor(s / 60);
     const secs = s % 60;
-    otpTimer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    otpTimer.textContent = `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
     if (s === 0) {
       clearInterval(timerInterval);
       resendOtpBtn.disabled = false;
@@ -46,31 +48,33 @@ const startTimer = () => {
 if (sendOtpBtn) {
   sendOtpBtn.addEventListener("click", async () => {
     const phone = phoneInput.value.trim();
-    const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'sms';
-    
+    const deliveryMethod =
+      document.querySelector('input[name="deliveryMethod"]:checked')?.value ||
+      "sms";
+
     if (phone.length < 10) {
       alert("Enter a valid 10-digit number");
       return;
     }
-    
+
     sendOtpBtn.disabled = true;
     sendOtpBtn.textContent = "Sending...";
-    
+
     try {
-      const response = await fetch('/api/send-otp/', {
-        method: 'POST',
+      const response = await fetch("/api/send-otp/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
         },
         body: JSON.stringify({
           phone: phone,
-          delivery_method: deliveryMethod
-        })
+          delivery_method: deliveryMethod,
+        }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         currentVerificationId = data.verification_id;
         maskedPhone.textContent = formatPhone(phone);
@@ -82,7 +86,7 @@ if (sendOtpBtn) {
         alert(data.error || "Failed to send OTP");
       }
     } catch (error) {
-      console.error('Send OTP error:', error);
+      console.error("Send OTP error:", error);
       alert("An error occurred. Please try again.");
     } finally {
       sendOtpBtn.disabled = false;
@@ -115,31 +119,33 @@ otpDigits.forEach((inp, idx) => {
 /* ---------- verify otp ---------- */
 if (verifyOtpBtn) {
   verifyOtpBtn.addEventListener("click", async () => {
-    const enteredOtp = Array.from(otpDigits).map(d => d.value).join("");
-    
+    const enteredOtp = Array.from(otpDigits)
+      .map((d) => d.value)
+      .join("");
+
     if (enteredOtp.length !== 6) {
       otpHint.textContent = "Please enter complete 6-digit OTP";
       return;
     }
-    
+
     verifyOtpBtn.disabled = true;
     verifyOtpBtn.textContent = "Verifying...";
-    
+
     try {
-      const response = await fetch('/api/verify-otp/', {
-        method: 'POST',
+      const response = await fetch("/api/verify-otp/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
         },
         body: JSON.stringify({
           verification_id: currentVerificationId,
-          otp: enteredOtp
-        })
+          otp: enteredOtp,
+        }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         clearInterval(timerInterval);
         otpModal.classList.add("hidden");
@@ -148,11 +154,11 @@ if (verifyOtpBtn) {
         otpHint.textContent = "Verification successful!";
       } else {
         otpHint.textContent = data.error || "Invalid OTP";
-        otpDigits.forEach(d => d.value = "");
+        otpDigits.forEach((d) => (d.value = ""));
         otpDigits[0].focus();
       }
     } catch (error) {
-      console.error('Verify OTP error:', error);
+      console.error("Verify OTP error:", error);
       otpHint.textContent = "An error occurred. Please try again.";
     } finally {
       verifyOtpBtn.disabled = false;
@@ -166,23 +172,23 @@ if (resendOtpBtn) {
   resendOtpBtn.addEventListener("click", async () => {
     resendOtpBtn.disabled = true;
     resendOtpBtn.classList.add("opacity-50");
-    
+
     try {
-      const response = await fetch('/api/resend-otp/', {
-        method: 'POST',
+      const response = await fetch("/api/resend-otp/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
         },
         body: JSON.stringify({
-          verification_id: currentVerificationId
-        })
+          verification_id: currentVerificationId,
+        }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        otpDigits.forEach(d => d.value = "");
+        otpDigits.forEach((d) => (d.value = ""));
         otpDigits[0].focus();
         startTimer();
         otpHint.textContent = "OTP resent successfully";
@@ -190,7 +196,7 @@ if (resendOtpBtn) {
         otpHint.textContent = data.error || "Failed to resend OTP";
       }
     } catch (error) {
-      console.error('Resend OTP error:', error);
+      console.error("Resend OTP error:", error);
       otpHint.textContent = "An error occurred. Please try again.";
     }
   });
@@ -210,7 +216,7 @@ if (payOptions.length > 0) {
       const cardForm = $("#cardForm");
       const upiForm = $("#upiForm");
       const netForm = $("#netForm");
-      
+
       if (cardForm) cardForm.classList.toggle("hidden", method !== "card");
       if (upiForm) upiForm.classList.toggle("hidden", method !== "upi");
       if (netForm) netForm.classList.toggle("hidden", method !== "netbank");
@@ -244,75 +250,78 @@ if (cardExpEl) {
 if (payBtn) {
   payBtn.addEventListener("click", async () => {
     console.log("Pay button clicked!");
-    
+
     // FIX: Find active payment method without using problematic class selector
-    const activePayOption = document.querySelector('.pay-option.bg-\\[\\#e20074\\]'); // Escaped version
-    const paymentMethod = activePayOption ? activePayOption.dataset.pay : 'card';
-    
+    const activePayOption = document.querySelector(
+      ".pay-option.bg-\\[\\#e20074\\]"
+    ); // Escaped version
+    const paymentMethod = activePayOption
+      ? activePayOption.dataset.pay
+      : "card";
+
     const orderData = {
-      fullname: $("#fullname")?.value || '',
-      email: $("#email")?.value || '',
-      address: $("#addr")?.value || '',
-      city: $("#city")?.value || '',
-      state: $("#state")?.value || '',
-      pin: $("#pin")?.value || '',
-      delivery: $("#delivery")?.value || '',
+      fullname: $("#fullname")?.value || "",
+      email: $("#email")?.value || "",
+      address: $("#addr")?.value || "",
+      city: $("#city")?.value || "",
+      state: $("#state")?.value || "",
+      pin: $("#pin")?.value || "",
+      delivery: $("#delivery")?.value || "",
       payment_method: paymentMethod,
     };
-    
+
     // Validate
     if (!orderData.fullname || !orderData.email || !orderData.address) {
       alert("Please fill all required fields");
       return;
     }
-    
+
     // Verify phone was verified
     if (!currentVerificationId) {
       alert("Please verify your phone number first");
       return;
     }
-    
+
     payBtn.disabled = true;
     payBtn.textContent = "Processing...";
-    
+
     try {
-      const response = await fetch('/api/initiate-payment/', {
-        method: 'POST',
+      const response = await fetch("/api/initiate-payment/", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCSRFToken()
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCSRFToken(),
         },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(orderData),
       });
-      
+
       const data = await response.json();
       console.log("Payment response:", data);
-      
+
       if (data.success) {
         // Create and submit PayU form
-        const form = document.createElement('form');
-        form.method = 'POST';
+        const form = document.createElement("form");
+        form.method = "POST";
         form.action = data.payu_url;
-        form.style.display = 'none';
-        
+        form.style.display = "none";
+
         Object.entries(data.payu_params).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
+          const input = document.createElement("input");
+          input.type = "hidden";
           input.name = key;
           input.value = value;
           form.appendChild(input);
         });
-        
+
         document.body.appendChild(form);
         form.submit();
-        
       } else {
         alert(data.error || "Failed to initiate payment");
         payBtn.disabled = false;
         payBtn.textContent = `Pay ₹${payBtn.dataset.total}`;
       }
     } catch (error) {
-      console.error('Payment error:', error);
+      console.error("Payment error:", error);
       alert("An error occurred. Please try again.");
       payBtn.disabled = false;
       payBtn.textContent = `Pay ₹${payBtn.dataset.total}`;
@@ -322,7 +331,7 @@ if (payBtn) {
 
 /* ---------- utility function for CSRF token ---------- */
 function getCSRFToken() {
-  const token = document.cookie.match(/csrftoken=([\w-]+)/)?.[1] || '';
+  const token = document.cookie.match(/csrftoken=([\w-]+)/)?.[1] || "";
   console.log("CSRF Token:", token); // Debug log
   return token;
 }

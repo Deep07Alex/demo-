@@ -13,6 +13,7 @@ def home_page(request):
         'romance_sale_books': Book.objects.filter(category='romance', on_sale=True).order_by('title'),
         'hindi_books': Book.objects.filter(category='hindi').order_by('title'),
         'business_stock_market_books': Book.objects.filter(category='business_stock_market').order_by('title'),
+        'mega_combo_books': Book.objects.filter(category='mega_combo').order_by('title'),
     }
     return render(request, 'index.html', context)
 
@@ -28,6 +29,7 @@ CATEGORY_SLUG_MAP = {
     'romance-sale': {'category': 'romance', 'on_sale': True, 'name': 'ROMANCE ON SALE'},
     'hindi-books': {'category': 'hindi', 'on_sale': False, 'name': 'HINDI BOOKS'},
     'business-stock-market': {'category': 'business_stock_market', 'on_sale': False, 'name': 'BUSINESS & STOCK-MARKET'},
+    'mega-combo': {'category': 'mega_combo', 'on_sale': False, 'name': 'MEGA COMBO'},
 }
 
 # homepage/views.py

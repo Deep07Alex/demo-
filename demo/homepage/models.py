@@ -11,6 +11,7 @@ class Book(models.Model):
         ('romance', 'ROMANCE ON SALE'),
         ('hindi', 'HINDI BOOKS'),
         ('business_stock_market', 'BUSINESS & STOCK-MARKET'),
+        ('mega_combo', 'MEGA COMBO'),
     ]
     
     title = models.CharField(max_length=200)
@@ -23,9 +24,22 @@ class Book(models.Model):
     date_added = models.DateTimeField(default=timezone.now)
     
     def save(self, *args, **kwargs):
+        # Auto-generate unique slug if not provided
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            
+            # Keep checking until we find a unique slug
+            while Book.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+                
+            self.slug = slug
         super().save(*args, **kwargs)
+
+    def __str__(self): 
+        return self.title
 
     def __str__(self): 
         return self.title

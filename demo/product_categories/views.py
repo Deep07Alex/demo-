@@ -11,6 +11,7 @@ PRODUCT_CATEGORY_MAP = {
     'ROS': {'name': 'ROMANCE ON SALE', 'model': Product, 'template': 'default'},
     'HIN': {'name': 'HINDI BOOKS', 'model': Product, 'template': 'default'},
     'BSM': {'name': 'BUSINESS & STOCK-MARKET', 'model': Product, 'template': 'default'},
+    'MGC': {'name': 'MEGA COMBO', 'model': Product, 'template': 'default'},
 }
 
 def productcatagory(request):

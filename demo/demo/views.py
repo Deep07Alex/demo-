@@ -174,39 +174,66 @@ def get_cart_items(request):
 
 @require_POST
 def remove_from_cart(request):
-    """Remove item from cart"""
-    data = json.loads(request.body)
-    cart = get_cart(request)
-    if data.get('key') in cart:
-        del cart[data.get('key')]
-        save_cart(request, cart)
-    
-    return JsonResponse({
-        'success': True,
-        'cart_count': sum(item['quantity'] for item in cart.values()),
-        'total': sum(item['price'] * item['quantity'] for item in cart.values())
-    })
+    """Remove item from cart with proper error handling"""
+    try:
+        data = json.loads(request.body)
+        cart = get_cart(request)
+        key = data.get('key')
+        
+        if not key:
+            return JsonResponse({'success': False, 'error': 'No key provided'}, status=400)
+        
+        if key in cart:
+            del cart[key]
+            save_cart(request, cart)
+            print(f"DEBUG: Removed item {key} from cart. New cart: {cart}")  # Debug log
+        else:
+            print(f"DEBUG: Key {key} not found in cart")  # Debug log
+            return JsonResponse({'success': False, 'error': 'Item not found in cart'}, status=404)
+        
+        return JsonResponse({
+            'success': True,
+            'cart_count': sum(item['quantity'] for item in cart.values()),
+            'total': sum(item['price'] * item['quantity'] for item in cart.values())
+        })
+    except Exception as e:
+        print(f"ERROR in remove_from_cart: {e}")  # Debug log
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+# Also update update_cart_quantity to be consistent
 @require_POST
 def update_cart_quantity(request):
-    """Update item quantity"""
-    data = json.loads(request.body)
-    cart = get_cart(request)
-    key = data.get('key')
-    
-    if key in cart:
-        quantity = int(data.get('quantity', 1))
-        if quantity <= 0:
-            del cart[key]
+    """Update item quantity with proper error handling"""
+    try:
+        data = json.loads(request.body)
+        cart = get_cart(request)
+        key = data.get('key')
+        
+        if not key:
+            return JsonResponse({'success': False, 'error': 'No key provided'}, status=400)
+        
+        if key in cart:
+            quantity = int(data.get('quantity', 1))
+            if quantity <= 0:
+                del cart[key]
+            else:
+                cart[key]['quantity'] = quantity
+            save_cart(request, cart)
+            print(f"DEBUG: Updated quantity for {key} to {quantity}. New cart: {cart}")  # Debug log
         else:
-            cart[key]['quantity'] = quantity
-        save_cart(request, cart)
-    
-    return JsonResponse({
-        'success': True,
-        'cart_count': sum(item['quantity'] for item in cart.values()),
-        'total': sum(item['price'] * item['quantity'] for item in cart.values())
-    })
+            print(f"DEBUG: Key {key} not found in cart")  # Debug log
+            return JsonResponse({'success': False, 'error': 'Item not found in cart'}, status=404)
+        
+        return JsonResponse({
+            'success': True,
+            'cart_count': sum(item['quantity'] for item in cart.values()),
+            'total': sum(item['price'] * item['quantity'] for item in cart.values())
+        })
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': 'Invalid quantity'}, status=400)
+    except Exception as e:
+        print(f"ERROR in update_cart_quantity: {e}")  # Debug log
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 def search(request):
     """Handle search page requests"""

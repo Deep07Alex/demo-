@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.cartOverlay = document.getElementById('cartOverlay');
             this.cartIcon = document.getElementById('cartIcon');
             this.addonTotal = 0;
+            this.isProcessing = false; // Add processing lock to prevent double-clicks
             
             console.log('CartManager: Elements found:', {
                 cartCountEl: this.cartCountEl,
@@ -76,6 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
         async addToCart(product) {
             console.log('CartManager.addToCart called with:', product);
             
+            // Prevent duplicate requests
+            if (this.isProcessing) {
+                console.warn('CartManager: Already processing a request');
+                return;
+            }
+            
+            this.isProcessing = true;
+            
             try {
                 const csrfToken = this.getCSRFToken();
                 console.log('CSRF Token:', csrfToken);
@@ -96,10 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Add to cart response:', data);
                 
                 if (data.success) {
-                    await this.updateCartDisplay();
+                    await this.updateCartDisplay(); // AWAIT this call
                     this.showNotification('Added to cart!');
                     
-                    // FIX: Auto-open cart after adding item
+                    // Auto-open cart after adding item
                     setTimeout(() => {
                         this.openCart();
                     }, 150);
@@ -110,32 +119,105 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) {
                 console.error('Cart add error:', error);
                 alert('Network error: ' + error.message);
+            } finally {
+                this.isProcessing = false;
             }
         }
         
         async removeFromCart(key) {
-            await fetch('/cart/remove/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({ key })
-            });
-            this.updateCartDisplay();
+            console.log('CartManager.removeFromCart called with key:', key);
+            
+            // Prevent duplicate requests
+            if (this.isProcessing) {
+                console.warn('CartManager: Already processing a request');
+                return;
+            }
+            
+            this.isProcessing = true;
+            
+            try {
+                const csrfToken = this.getCSRFToken();
+                const response = await fetch('/cart/remove/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ key })
+                });
+                
+                const data = await response.json();
+                console.log('Remove from cart response:', data);
+                
+                if (data.success) {
+                    await this.updateCartDisplay(); // AWAIT this call - FIXES THE MAIN ISSUE
+                    this.showNotification('Item removed from cart');
+                } else {
+                    console.error('Remove from cart failed:', data.error);
+                    alert('Failed to remove item: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Remove from cart error:', error);
+                alert('Network error while removing item: ' + error.message);
+            } finally {
+                this.isProcessing = false;
+            }
         }
         
         async updateQuantity(key, quantity) {
-            await fetch('/cart/update/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({ key, quantity })
-            });
-            this.updateCartDisplay();
+            console.log('CartManager.updateQuantity called:', { key, quantity });
+            
+            // Prevent duplicate requests
+            if (this.isProcessing) {
+                console.warn('CartManager: Already processing a request');
+                return;
+            }
+            
+            this.isProcessing = true;
+            
+            // Ensure quantity is a number
+            quantity = parseInt(quantity);
+            if (isNaN(quantity) || quantity < 1) {
+                console.warn('Invalid quantity, resetting to 1');
+                quantity = 1;
+            }
+            
+            try {
+                const csrfToken = this.getCSRFToken();
+                const response = await fetch('/cart/update/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ key, quantity })
+                });
+                
+                const data = await response.json();
+                console.log('Update quantity response:', data);
+                
+                if (data.success) {
+                    await this.updateCartDisplay(); // AWAIT this call
+                } else {
+                    console.error('Update quantity failed:', data.error);
+                    alert('Failed to update quantity: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Update quantity error:', error);
+                alert('Network error while updating quantity: ' + error.message);
+            } finally {
+                this.isProcessing = false;
+            }
         }
         
         async updateCartDisplay() {
             try {
                 const response = await fetch('/cart/items/');
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
+                const data = await response.json();
                 console.log('Cart display data:', data);
                 
                 if (this.cartCountEl) {
@@ -147,10 +229,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
+                // Update badge in header
+                const cartCountBadge = document.getElementById('cartCountBadge');
+                if (cartCountBadge) {
+                    if (data.cart_count > 0) {
+                        cartCountBadge.textContent = data.cart_count;
+                        cartCountBadge.style.display = 'flex';
+                    } else {
+                        cartCountBadge.style.display = 'none';
+                    }
+                }
+                
                 this.addonTotal = data.addon_total || 0;
                 this.renderCartItems(data.items || [], data.total || 0);
             } catch (error) {
                 console.error('Display error:', error);
+                this.showNotification('Error loading cart data', 'error');
             }
         }
         
@@ -158,7 +252,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('cartItems');
             const footer = document.getElementById('cartFooter');
             
-            if (!container) return;
+            if (!container) {
+                console.error('Cart items container not found');
+                return;
+            }
             
             if (items.length === 0) {
                 container.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
@@ -167,18 +264,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
+            // Generate cart items HTML with proper data attributes for debugging
             container.innerHTML = items.map((item, index) => `
-                <div class="cart-item">
+                <div class="cart-item" data-cart-key="${item.type}_${item.id}">
                     <img src="${item.image}" alt="${item.title}" onerror="this.src='/static/images/placeholder.png'; this.onerror=null;">
                     <div class="cart-item-details">
                         <div class="cart-item-title">${item.title}</div>
-                        <div class="cart-item-price">₹${item.price}</div>
+                        <div class="cart-item-price">₹${parseFloat(item.price).toFixed(2)}</div>
                         <div class="cart-item-controls">
                             <button class="quantity-btn" onclick="cartManager.updateQuantity('${item.type}_${item.id}', ${item.quantity - 1})">-</button>
                             <input type="number" class="quantity-input" value="${item.quantity}" min="1" 
-                                   onchange="cartManager.updateQuantity('${item.type}_${item.id}', this.value)">
+                                   onchange="cartManager.updateQuantity('${item.type}_${item.id}', parseInt(this.value) || 1)">
                             <button class="quantity-btn" onclick="cartManager.updateQuantity('${item.type}_${item.id}', ${item.quantity + 1})">+</button>
-                            <span class="remove-item" onclick="cartManager.removeFromCart('${item.type}_${item.id}')">
+                            <span class="remove-item" onclick="cartManager.removeFromCart('${item.type}_${item.id}')" 
+                                  style="cursor: pointer; color: #dc3545; margin-left: 8px;" title="Remove item">
                                 <i class="fas fa-trash"></i>
                             </span>
                         </div>
@@ -216,18 +315,29 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (footer) {
                 footer.style.display = 'block';
-                document.getElementById('cartTotal').textContent = `₹${total.toFixed(2)}`;
+                const cartTotalEl = document.getElementById('cartTotal');
+                if (cartTotalEl) {
+                    cartTotalEl.textContent = `₹${parseFloat(total).toFixed(2)}`;
+                }
             }
         }
         
         async loadAddons() {
             try {
                 const response = await fetch('/cart/addons/get/');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
                 const data = await response.json();
                 
                 document.querySelectorAll('.addon-checkbox').forEach(checkbox => {
                     const addon = checkbox.dataset.addon;
                     checkbox.checked = data.addons[addon] || false;
+                    // Remove existing listener to prevent duplicates
+                    checkbox.replaceWith(checkbox.cloneNode(true));
+                });
+                
+                // Re-attach listeners
+                document.querySelectorAll('.addon-checkbox').forEach(checkbox => {
                     checkbox.addEventListener('change', () => this.updateAddons());
                 });
                 
@@ -258,7 +368,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (data.success) {
                     this.addonTotal = data.addon_total;
-                    this.updateCartDisplay();
+                    await this.updateCartDisplay(); // AWAIT this call
+                } else {
+                    console.error('Update addons failed:', data.error);
                 }
                 
             } catch (error) {
@@ -287,13 +399,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = '';
         }
         
-        showNotification(message) {
+        showNotification(message, type = 'success') {
             const notification = document.createElement('div');
             notification.textContent = message;
+            const bgColor = type === 'error' ? '#f44336' : '#4CAF50';
             notification.style.cssText = `
-                position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white;
+                position: fixed; top: 20px; right: 20px; background: ${bgColor}; color: white;
                 padding: 14px 24px; border-radius: 8px; z-index: 10000; font-weight: 500;
-                transform: translateX(400px); transition: transform 0.3s ease;
+                transform: translateX(400px); transition: transform 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             `;
             document.body.appendChild(notification);
             setTimeout(() => notification.style.transform = 'translateX(0)', 100);
@@ -306,6 +419,9 @@ document.addEventListener('DOMContentLoaded', () => {
         getCSRFToken() {
             const cookie = document.cookie.match(/csrftoken=([\w-]+)/);
             const token = cookie ? cookie[1] : '';
+            if (!token) {
+                console.warn('CSRF token not found! This may cause request failures.');
+            }
             console.log('getCSRFToken:', token);
             return token;
         }
