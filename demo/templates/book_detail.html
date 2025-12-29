@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="csrf-token" content="{{ csrf_token }}" />
     <title>{{ book.title }} | Family BookStore</title>
 
     <link rel="stylesheet" href="{% static 'css/bookdetails.css' %}" />
@@ -43,16 +43,22 @@
     <!-- Header -->
     <header>
       <nav class="navbar">
+        <!-- Hamburger Menu -->
+        <div class="hamburger" id="hamburger">
+          <i class="fa fa-bars"></i>
+        </div>
         <div class="nav-logo">
           <div class="logo"></div>
         </div>
         <div class="nav-links">
-          <a href="/" class="active">Home</a>
-          <a href="/productcatagory/">Product Categories</a>
+          <a href="#" class="active" id="homeLink">Home</a>
+          <a href="#">Product Categories</a>
           <a href="#">Bulk Purchase</a>
-          <a href="/aboutus/">About Us</a>
+          <a href="#">About Us</a>
           <a href="#">Return & Replacement</a>
-          <a href="/contactinformation/">Contact Us</a>
+          <a href="#">Contact Us</a>
+          {% comment %} <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a> {% endcomment %}
         </div>
         <div class="nav-icons">
           <div class="search-container">
@@ -145,10 +151,24 @@
           <div class="icon-item">🔒 Secure Payments</div>
           <div class="icon-item">🚚 COD Available</div>
         </div>
-
       </div>
     </div>
 
+    <!-- Right-Side Slider -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-sidebar" id="closeSidebar">&times;</span>
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/productcatagory/">Product Categories</a></li>
+        <li><a href="/bulkpurchase/">Bulk Purchase</a></li>
+        <li><a href="/aboutus/">About Us</a></li>
+        <li><a href="/return/">Return & Replacement</a></li>
+        <li><a href="/contactinformation/">Contact Us</a></li>
+      </ul>
+    </div>
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-container">
@@ -195,7 +215,7 @@
       </div>
     </footer>
     <script src="{% static 'js/script.js' %}"></script>
-<script src="{% static 'js/cart.js' %}"></script>
-<script src="{% static 'js/bookdetails.js' %}"></script> 
+    <script src="{% static 'js/cart.js' %}"></script>
+    <script src="{% static 'js/bookdetails.js' %}"></script>
   </body>
 </html>
