@@ -49,14 +49,14 @@ class ShiprocketAPI:
         }
 
     def calculate_shipping_rates(
-    self,
-    pickup_pincode,
-    delivery_pincode,
-    weight,
-    length,
-    width,
-    height,
-    cod=0,
+        self,
+        pickup_pincode,
+        delivery_pincode,
+        weight,
+        length,
+        width,
+        height,
+        cod=0,
     ):
         """Calculate shipping rates between pincodes"""
         try:
@@ -71,7 +71,7 @@ class ShiprocketAPI:
                 "cod": cod,
             }
             headers = self.get_headers()
-            # CHANGED: use GET with params
+            # use GET with params
             response = requests.get(url, params=params, headers=headers, timeout=10)
             response.raise_for_status()
             data = response.json()
@@ -137,6 +137,11 @@ class ShiprocketAPI:
             package_breadth = 15
             package_height = max(2, total_items * 2)
 
+            # Map our payment_method to Shiprocket's value
+            shiprocket_payment_method = (
+                "COD" if getattr(order, "payment_method", "") == "cod" else "prepaid"
+            )
+
             payload = {
                 "order_id": f"FB{order.id}",
                 "order_date": order.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -155,7 +160,7 @@ class ShiprocketAPI:
                 "billing_phone": order.phone_number,
                 "shipping_is_billing": True,
                 "order_items": order_items,
-                "payment_method": "prepaid",
+                "payment_method": shiprocket_payment_method,
                 "shipping_charges": float(order.shipping),
                 "giftwrap_charges": 0,
                 "transaction_charges": 0,

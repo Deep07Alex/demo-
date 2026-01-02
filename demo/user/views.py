@@ -23,7 +23,6 @@ from .email_otp_utils import (
     verify_otp_from_cache,
 )
 
-
 import json
 import logging
 
@@ -31,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------- CART HELPERS ---------------- #
-
 
 def get_cart(request):
     return request.session.get("cart", {})
@@ -43,7 +41,6 @@ def save_cart(request, cart):
 
 
 # ---------------- CART API ---------------- #
-
 
 @require_POST
 def clear_cart(request):
@@ -132,6 +129,8 @@ def get_cart_items(request):
 
     total_books = sum(item["quantity"] for item in cart.values())
     product_total = sum(float(item["price"]) * item["quantity"] for item in cart.values())
+
+    # Simple cart-level preview shipping (used in sidebar/cart page)
     shipping = 0 if product_total >= 499 else 49.00
     discount = 100 if total_books >= 10 else 0
     total = product_total + shipping + addon_total - discount
@@ -227,7 +226,6 @@ def update_cart_quantity(request):
 
 # ---------------- CHECKOUT ---------------- #
 
-
 def checkout(request):
     """New checkout page with email verification"""
     try:
@@ -248,6 +246,9 @@ def checkout(request):
             addon_prices.get(key, 0) for key, selected in addons.items() if selected
         )
         total_books = sum(item["quantity"] for item in cart.values())
+
+        # Initial estimate used only for template; final shipping is computed
+        # in initiate_payu_payment using payment method rules.
         shipping = 0 if subtotal >= 499 else 49.00
         discount = 100 if total_books >= 10 else 0
         total = subtotal + shipping + addon_total - discount
@@ -284,7 +285,6 @@ def checkout(request):
 
 # ---------------- EMAIL OTP ---------------- #
 
-
 @require_POST
 def send_email_otp(request):
     """Send OTP to email"""
@@ -295,24 +295,20 @@ def send_email_otp(request):
         if not email or '@' not in email:
             return JsonResponse({'success': False, 'error': 'Invalid email address'})
 
-        # Generate OTP
         otp = generate_otp()
 
-        # Send real email
         success, message = send_email_otp_util(email, otp)
 
         if not success:
             logger.error(f"Failed to send OTP email: {message}")
             return JsonResponse({'success': False, 'error': 'Could not send OTP email'})
 
-        # Store OTP only if email sent
         store_otp_in_cache(email, otp)
 
         return JsonResponse({'success': True, 'message': 'OTP sent to your email'})
     except Exception as e:
         logger.error(f"Send email OTP error: {str(e)}", exc_info=True)
         return JsonResponse({'success': False, 'error': 'Failed to send OTP'})
-
 
 
 @require_POST
@@ -345,7 +341,6 @@ def verify_email_otp(request):
 
 
 # ---------------- PAYU PAYMENT ---------------- #
-
 
 @require_POST
 def initiate_payu_payment(request):
@@ -385,7 +380,32 @@ def initiate_payu_payment(request):
             addon_prices.get(key, 0) for key, selected in addons.items() if selected
         )
         total_books = sum(item["quantity"] for item in cart.values())
-        shipping = float(data.get("shipping_cost", 0))
+
+        # base courier from Shiprocket (not used in pricing rules currently)
+        base_courier_charge = float(data.get("shipping_cost", 0))
+
+        # payment_method from frontend: "payu" or "cod"
+        payment_method = data.get("payment_method", "payu")
+
+        # Admin shipping rules:
+        # - subtotal >= 499 & PayU      -> shipping = 0
+        # - subtotal >= 499 & COD       -> shipping = 49
+        # - subtotal < 499  & PayU      -> shipping = 40
+        # - subtotal < 499  & COD       -> shipping = 89
+        if subtotal >= 499:
+            if payment_method == "payu":
+                shipping = 0.0
+            else:
+                shipping = 49.0
+        else:
+            if payment_method == "payu":
+                shipping = 40.0
+            else:
+                shipping = 40.0 + 49.0  # 89
+
+        # If you ever want to add courier charge on top, uncomment:
+        # shipping += base_courier_charge
+
         discount = 100 if total_books >= 10 else 0
         total = subtotal + shipping + addon_total - discount
 
@@ -399,7 +419,7 @@ def initiate_payu_payment(request):
             state=state,
             pin_code=pincode,
             delivery_type=delivery_type,
-            payment_method=data.get("payment_method", "card"),
+            payment_method=payment_method,
             subtotal=subtotal,
             shipping=shipping,
             discount=discount,
@@ -484,7 +504,6 @@ def payment_success(request):
                 order = Order.objects.get(id=order_id)
 
                 if status == "success":
-                    # payment successful
                     order.status = "processing"
                     order.payment_id = payment_id
                     order.save()
@@ -493,7 +512,6 @@ def payment_success(request):
                     shiprocket_success = False
                     shiprocket_data = None
 
-                    # ---------- UPDATED SHIPROCKET BLOCK ----------
                     try:
                         shiprocket = ShiprocketAPI()
                         shiprocket_success, shiprocket_result = shiprocket.create_order(
@@ -506,7 +524,6 @@ def payment_success(request):
                             order.courier_name = shiprocket_result.get("courier_name") or ""
                             order.label_url = shiprocket_result.get("label_url")
 
-                            # If AWB is present, mark shipped; else keep processing
                             if shiprocket_result.get("awb_code"):
                                 order.status = "shipped"
                             else:
@@ -521,7 +538,6 @@ def payment_success(request):
                             f"Shiprocket error: {str(shiprocket_error)}",
                             exc_info=True,
                         )
-                    # ---------- END UPDATED SHIPROCKET BLOCK ----------
 
                     admin_success, _ = send_admin_order_notification(order, items)
                     customer_success, _ = send_customer_order_confirmation(
@@ -600,7 +616,6 @@ def payment_failure(request):
 
 # ---------------- SHIPROCKET WEBHOOK ---------------- #
 
-
 @csrf_exempt
 def shiprocket_webhook(request):
     """Handle Shiprocket webhook for tracking updates"""
@@ -640,7 +655,6 @@ def shiprocket_webhook(request):
 
 
 # ---------------- SHIPPING QUOTE ---------------- #
-
 
 @require_POST
 def calculate_shipping(request):
