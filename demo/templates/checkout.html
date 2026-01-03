@@ -17,16 +17,36 @@
     <!-- Header -->
     <header>
       <nav class="navbar">
+        <!-- Hamburger Menu -->
+        <div class="hamburger" id="hamburger">
+          <i class="fa fa-bars"></i>
+        </div>
         <div class="nav-logo">
           <div class="logo"></div>
         </div>
         <div class="nav-links">
-          <a href="/">Home</a>
-          <a href="/productcatagory/">Product Categories</a>
-          <a href="/bulkpurchase/">Bulk Purchase</a>
-          <a href="/aboutus/">About Us</a>
+          <a href="#" class="active" id="homeLink">Home</a>
+          <a href="#">Product Categories</a>
+          <a href="#">Bulk Purchase</a>
+          <a href="#">About Us</a>
+          <a href="#">Return & Replacement</a>
+          <a href="#">Contact Us</a>
+          {% comment %} <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a> {% endcomment %}
         </div>
         <div class="nav-icons">
+          <div class="search-container">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search books..."
+              id="searchInput"
+            />
+            <div class="search-btn" id="searchBtn">
+              <i class="fa fa-search"></i>
+            </div>
+            <div id="searchDropdown" class="search-dropdown"></div>
+          </div>
           <div class="cart-icon-container" id="cartIcon">
             <i class="fa fa-shopping-cart"></i>
             <span class="cart-count" id="cartCountBadge" style="display: none"
@@ -396,6 +416,23 @@
       </div>
     </div>
 
+    <!-- Right-Side Slider -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3>Menu</h3>
+        <span class="close-sidebar" id="closeSidebar">&times;</span>
+      </div>
+      <ul class="sidebar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/productcatagory/">Product Categories</a></li>
+        <li><a href="/bulkpurchase/">Bulk Purchase</a></li>
+        <li><a href="/aboutus/">About Us</a></li>
+        <li><a href="/return/">Return & Replacement</a></li>
+        <li><a href="/contactinformation/">Contact Us</a></li>
+      </ul>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
     <script src="{% static 'js/cart.js' %}"></script>
     <script src="{% static 'js/checkout.js' %}"></script>
 
