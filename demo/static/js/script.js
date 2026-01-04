@@ -472,16 +472,27 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ============================================
-// Category Page Load More Functionality
+// Universal Load More Functionality (FIXED FOR BOTH TEMPLATES)
 // ============================================
 document.addEventListener("DOMContentLoaded", function () {
   const loadMoreBtn = document.getElementById("loadMoreBtn");
   const bookGrid = document.getElementById("bookGrid");
 
-  // CRITICAL: Exit if elements don't exist (not on category pages)
-  if (!loadMoreBtn || !bookGrid) return;
+  if (!loadMoreBtn || !bookGrid) {
+    console.log("Load More: Elements not found - not a category page");
+    return;
+  }
 
   let currentPage = 1;
+  const categorySlug = bookGrid.dataset.categorySlug;
+  
+  // Detect which type of category page we're on
+  const isProductCategory = window.location.pathname.includes('/productcatagory/');
+  
+  console.log("Load More initialized:", {
+    category: categorySlug,
+    isProductCategory: isProductCategory
+  });
 
   loadMoreBtn.addEventListener("click", async function () {
     loadMoreBtn.disabled = true;
@@ -489,17 +500,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
     try {
       currentPage++;
-      const categorySlug = bookGrid.dataset.categorySlug;
+      
+      // Use correct URL for product categories
+      const url = isProductCategory 
+        ? `/productcatagory/${categorySlug}/load-more/?page=${currentPage}`
+        : `/category/${categorySlug}/load-more/?page=${currentPage}`;
+      
+      console.log("Load More: Fetching URL:", url);
 
-      const response = await fetch(
-        `/category/${categorySlug}/load-more/?page=${currentPage}`
-      );
+      const response = await fetch(url);
       const data = await response.json();
 
-      if (data.success && data.books.length > 0) {
+      // Handle both 'books' and 'products' keys from backend
+      const books = data.books || data.products || [];
+      console.log("Load More: Items extracted:", books);
+
+      if (data.success && books.length > 0) {
         // Append new books
-        data.books.forEach((book) => {
-          const bookCard = createBookCard(book);
+        books.forEach((book) => {
+          const bookCard = createBookCard(book, isProductCategory);
           if (bookCard) bookGrid.appendChild(bookCard);
         });
 
@@ -519,14 +538,23 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 2000);
     } finally {
       loadMoreBtn.disabled = false;
-      loadMoreBtn.textContent = "Load More Books";
+      if (loadMoreBtn.style.display !== "none") {
+        loadMoreBtn.textContent = "Load More Books";
+      }
     }
   });
 
-  function createBookCard(book) {
+  function createBookCard(book, isProductCategory = false) {
     try {
+      // Create card container (matches your template structure)
+      const cardDiv = document.createElement("div");
+      cardDiv.className = "book-card";
+
+      // Create link
       const link = document.createElement("a");
-      link.href = `/books/${book.slug}/`;
+      link.href = isProductCategory 
+        ? `/productcatagory/product/${book.slug}/`
+        : `/books/${book.slug}/`;
       link.className = "book-card-link";
 
       const priceHtml = book.old_price
@@ -536,26 +564,33 @@ document.addEventListener("DOMContentLoaded", function () {
       const saleTag = book.on_sale ? `<span class="sale-tag">Sale</span>` : "";
 
       link.innerHTML = `
-                <div class="book-card">
-                    <img src="${book.image_url}" alt="${book.title}" 
-                         onerror="this.src='/static/images/placeholder.png'; this.onerror=null;" />
-                    ${saleTag}
-                    <h3 class="book-title">${book.title}</h3>
-                    ${priceHtml}
-                    <button 
-                        class="cart-btn add-to-cart-btn" 
-                        data-id="${book.id}"
-                        data-type="book"
-                        data-title="${book.title}"
-                        data-price="${book.price}"
-                        data-image="${book.image_url}"
-                    >
-                        Add to cart
-                    </button>
-                </div>
-            `;
+        <img src="${book.image_url}" alt="${book.title}" 
+             onerror="this.src='/static/images/placeholder.png'; this.onerror=null;" />
+        ${saleTag}
+        <h3 class="book-title">${book.title}</h3>
+        ${priceHtml}
+      `;
 
-      return link;
+      // Create button
+      const button = document.createElement("button");
+      button.className = "cart-btn add-to-cart-btn";
+      button.setAttribute("data-id", book.id);
+      button.setAttribute("data-type", "book");
+      button.setAttribute("data-title", book.title);
+      button.setAttribute("data-price", book.price);
+      button.setAttribute("data-image", book.image_url);
+      button.textContent = "Add to cart";
+
+      // Attach cart listener if available
+      if (window.attachCartListener) {
+        window.attachCartListener(button);
+      }
+
+      // Assemble card
+      cardDiv.appendChild(link);
+      cardDiv.appendChild(button);
+
+      return cardDiv;
     } catch (error) {
       console.error("Error creating book card:", error);
       return null;

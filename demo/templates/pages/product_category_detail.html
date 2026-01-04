@@ -7,8 +7,7 @@
 <section class="book-category-page">
   <h2 class="section-title">{{ category_name }}</h2>
 
-  <!-- Added ID and data attribute -->
-  <div class="book-grid" id="productGrid" data-category-type="{{ category_type }}">
+  <div class="book-grid" id="bookGrid" data-category-slug="{{ category_type }}">
     {% for item in items %}
     <div class="book-card">
       <a href="{% url 'product_detail' item.slug %}" class="book-card-link">
@@ -24,14 +23,14 @@
         {% endif %}
       </a>
       
-      <!-- Button outside the link -->
+      <!-- FIX: Use item.image.url to match model field -->
       <button 
         class="cart-btn add-to-cart-btn" 
         data-id="{{ item.id }}"
         data-type="book"
         data-title="{{ item.title|escape }}"
         data-price="{{ item.price }}"
-        data-image="{{ item.image_url }}"
+        data-image="{{ item.image.url }}"
       >
         Add to cart
       </button>
@@ -41,10 +40,9 @@
     {% endfor %}
   </div>
 
-  <!-- Load More Button -->
   {% if has_more %}
   <div class="load-more-container" style="text-align: center; margin: 30px 0">
-    <button id="loadMoreProductsBtn" class="view-btn" style="display: inline-block">
+    <button id="loadMoreBtn" class="view-btn" style="display: inline-block">
       Load More 
     </button>
   </div>
@@ -53,6 +51,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'js/script.js' %}"></script>
 <script src="{% static 'js/cart.js' %}"></script>
 {% endblock %}

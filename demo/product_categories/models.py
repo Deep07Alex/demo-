@@ -14,7 +14,7 @@ class product_variety(models.Model):
         ('ROS', 'ROMANCE ON SALE'),
         ('HIN', 'HINDI BOOKS'),
         ('BSM', 'BUSINESS & STOCK-MARKET'),
-        ('MGC', 'MEGA COMBO'), 
+        ('BST', 'BEST SELLERS'),
     ]
     
     name = models.CharField(max_length=100)
